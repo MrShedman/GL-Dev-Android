@@ -43,7 +43,7 @@ public class Texture
 
         if (textureHandle[0] == 0)
         {
-           // throw new RuntimeException("Error loading texture.");
+            throw new RuntimeException("Error loading texture.");
         }
 
         mTexture = textureHandle[0];

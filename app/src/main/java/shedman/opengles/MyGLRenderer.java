@@ -42,8 +42,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public MyGLRenderer(final Context activityContext)
     {
         mActivityContext = activityContext;
-        mTexture = new Texture();
-        mTexture.loadTexture(mActivityContext, R.raw.texture);
     }
 
     @Override
@@ -53,8 +51,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
+
+
         mTriangle = new Triangle();
         mSquare   = new Square();
+
+        mTexture = new Texture();
+        mTexture.loadTexture(mActivityContext, R.raw.texture);
         mTriangle.setTexture(mTexture);
     }
 
@@ -73,7 +76,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Draw square
 
-        mSquare.draw(mMVPMatrix);
+       // mSquare.draw(mMVPMatrix);
 
 
         // Create a rotation for the triangle
@@ -162,7 +165,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         int error;
         while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
             Log.e(TAG, glOperation + ": glError " + error);
-            //throw new RuntimeException(glOperation + ": glError " + error);
+            throw new RuntimeException(glOperation + ": glError " + error);
         }
     }
 

@@ -15,20 +15,11 @@ import android.view.MotionEvent;
 public class MyGLSurfaceView extends GLSurfaceView
 {
 
-    private final MyGLRenderer mRenderer;
+    private MyGLRenderer mRenderer;
 
     public MyGLSurfaceView(Context context)
     {
         super(context);
-
-        // Create an OpenGL ES 2.0 context.
-        setEGLContextClientVersion(2);
-        // Set the Renderer for drawing on the GLSurfaceView
-        mRenderer = new MyGLRenderer(context);
-        setRenderer(mRenderer);
-
-        // Render the view only when there is a change in the drawing data
-        setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
     private final float TOUCH_SCALE_FACTOR = 100.0f / 320;
@@ -41,35 +32,49 @@ public class MyGLSurfaceView extends GLSurfaceView
         // and other input controls. In this case, you are only
         // interested in events where the touch position changed.
 
-        float x = e.getX();
-        float y = e.getY();
-
-        switch (e.getAction())
+        if(e != null)
         {
-            case MotionEvent.ACTION_MOVE:
+            float x = e.getX();
+            float y = e.getY();
 
-                float dx = x - mPreviousX;
-                float dy = y - mPreviousY;
+            switch (e.getAction())
+            {
+                case MotionEvent.ACTION_MOVE:
 
-                // reverse direction of rotation above the mid-line
-                if (y > getHeight() / 2)
-                {
-                    dx *= -1;
-                }
+                    float dx = x - mPreviousX;
+                    float dy = y - mPreviousY;
 
-                // reverse direction of rotation to left of the mid-line
-                if (x < getWidth() / 2)
-                {
-                    dy *= -1 ;
-                }
+                    // reverse direction of rotation above the mid-line
+                    if (y > getHeight() / 2)
+                    {
+                        dx *= -1;
+                    }
 
-                mRenderer.setAngle(mRenderer.getAngle() + ((dx + dy) * TOUCH_SCALE_FACTOR));  // = 180.0f / 320
-                requestRender();
+                    // reverse direction of rotation to left of the mid-line
+                    if (x < getWidth() / 2)
+                    {
+                        dy *= -1 ;
+                    }
+
+                    mRenderer.setAngle(mRenderer.getAngle() + ((dx + dy) * TOUCH_SCALE_FACTOR));  // = 180.0f / 320
+                    requestRender();
+            }
+
+            mPreviousX = x;
+            mPreviousY = y;
+            return true;
         }
+        else
+        {
+            return super.onTouchEvent(e);
+        }
+    }
 
-        mPreviousX = x;
-        mPreviousY = y;
-        return true;
+    @Override
+    public void setRenderer(Renderer renderer)
+    {
+        this.mRenderer = (MyGLRenderer)renderer;
+        super.setRenderer(renderer);
     }
 
 }

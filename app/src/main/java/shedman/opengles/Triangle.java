@@ -40,7 +40,7 @@ public class Triangle
                     "varying vec2 tCoord;" +
                     "void main() {" +
                     "   vec4 c = texture2D(sTexture, tCoord);"+
-                    "   gl_FragColor = tColor;" +
+                    "   gl_FragColor = tColor * c;" +
                     "}";
 
     private Vertex[] mVertices = new Vertex[3];

@@ -9,13 +9,16 @@ import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class OpenGLES20Activity extends Activity {
-
+public class OpenGLES20Activity extends Activity
+{
     private GLSurfaceView mGLView;
+    private MyGLRenderer mGLRenderer;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -23,6 +26,12 @@ public class OpenGLES20Activity extends Activity {
         // as the ContentView for this Activity
         mGLView = new MyGLSurfaceView(this);
         setContentView(mGLView);
+        mGLView.setEGLContextClientVersion(2);
+
+        mGLRenderer = new MyGLRenderer(this);
+        mGLView.setRenderer(mGLRenderer);
+
+        mGLView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
     @Override
