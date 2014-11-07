@@ -21,15 +21,45 @@ import android.util.Log;
  *   <li>{@link android.opengl.GLSurfaceView.Renderer#onSurfaceChanged}</li>
  * </ul>
  */
-public class MyGLRenderer implements GLSurfaceView.Renderer {
+public class MyGLRenderer implements GLSurfaceView.Renderer
+{
+
+    private final String vertexShaderCode =
+            // This matrix member variable provides a hook to manipulate
+            // the coordinates of the objects that use this vertex shader
+            "uniform mat4 uMVPMatrix;" +
+                    "attribute vec2 vTextureCoord;" +
+                    "varying vec2 tCoord;" +
+                    "attribute vec4 vColor;" +
+                    "varying vec4 tColor;" +
+                    "attribute vec3 vPosition;" +
+                    "void main() {" +
+                    "tCoord = vTextureCoord;" +
+                    "tColor = vColor;" +
+                    "  gl_Position = uMVPMatrix * vec4( vPosition, 1.0 );" +
+                    "}";
+
+    private final String fragmentShaderCode =
+            "precision mediump float;" +
+                    "varying vec4 tColor;" +
+                    "uniform sampler2D sTexture;" +
+                    "varying vec2 tCoord;" +
+                    "void main() {" +
+                    "   vec4 c = texture2D(sTexture, tCoord);"+
+                    "   gl_FragColor = tColor * c;" +
+                    "}";
 
     private final Context mActivityContext;
+
+    private FPSCounter mFPSCounter;
 
     private static final String TAG = "MyGLRenderer";
     private Triangle mTriangle;
     private Square   mSquare;
 
     private Texture mTexture;
+
+    private Shader mShader;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];
@@ -47,18 +77,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config)
     {
-      //  GLES30.glTexImage2D();
         // Set the background frame color
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-
+        mFPSCounter = new FPSCounter();
 
         mTriangle = new Triangle();
         mSquare   = new Square();
 
         mTexture = new Texture();
         mTexture.loadTexture(mActivityContext, R.raw.texture);
-        mTriangle.setTexture(mTexture);
+
+        mShader = new Shader(vertexShaderCode, fragmentShaderCode);
     }
 
     @Override
@@ -94,7 +124,9 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
 
         // Draw triangle
-        mTriangle.draw(scratch);
+        mTriangle.draw(scratch, mTexture, mShader);
+
+        mFPSCounter.logFrame();
     }
 
     @Override
@@ -111,43 +143,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     }
 
-    /**
-     * Utility method for compiling a OpenGL shader.
-     *
-     * <p><strong>Note:</strong> When developing shaders, use the checkGlError()
-     * method to debug shader coding errors.</p>
-     *
-     * @param type - Vertex or fragment shader type.
-     * @param shaderCode - String containing the shader code.
-     * @return - Returns an id for the shader.
-     */
-    public static int loadShader(int type, String shaderCode){
 
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
-        int shader = GLES20.glCreateShader(type);
-
-        // add the source code to the shader and compile it
-        GLES20.glShaderSource(shader, shaderCode);
-        GLES20.glCompileShader(shader);
-        MyGLRenderer.checkGlError("glCompileShader");
-
-        final int[] compileStatus = new int[1];
-        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compileStatus, 0);
-
-        // If the compilation failed, delete the shader.
-        if (compileStatus[0] == 0)
-        {
-            throw new RuntimeException(GLES20.glGetShaderInfoLog(shader));
-        }
-
-        if (shader == 0)
-        {
-            throw new RuntimeException("Error creating shader.");
-        }
-
-        return shader;
-    }
 
     /**
      * Utility method for debugging OpenGL calls. Provide the name of the call
